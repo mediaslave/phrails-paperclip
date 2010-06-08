@@ -2,7 +2,7 @@
 /**
 * Interface for all of the cloud adapters
 */
-class AbstractPhrailsPaperclipCloud implements PhrailsPaperclipCloud
+abstract class AbstractPhrailsPaperclipCloud implements InterfacePhrailsPaperclip
 {
 	
 	protected $cloud;
@@ -41,4 +41,11 @@ class AbstractPhrailsPaperclipCloud implements PhrailsPaperclipCloud
 	{
 		return $this->cloud;
 	}
+	
+	/**
+	 * Create a connection to the cloud.
+	 * 
+	 * @return mixed
+	 */
+	abstract protected function connect();
 }

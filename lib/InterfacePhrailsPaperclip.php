@@ -2,7 +2,7 @@
 /**
 * Interface for all of the cloud adapters
 */
-interface PhrailsPaperclipCloud
+interface InterfacePhrailsPaperclip
 {
 	
 	/**

@@ -1,8 +1,9 @@
 <?php
+include_once('cloud/rsc/cloudfiles.php');
 /**
 * Interface for all of the cloud adapters
 */
-class Rsc extends AbstractPhrailsPaperclipCloud
+class PhrailsPaperclipRsc extends AbstractPhrailsPaperclipCloud
 {
 	
 	/**
@@ -11,9 +12,13 @@ class Rsc extends AbstractPhrailsPaperclipCloud
 	 * @return Rsc
 	 * @author Justin Palmer
 	 **/
-	public function __construct()
+	public function __construct($username, $key)
 	{
-		$this->cloud = new CF_Authentication(PhrailsPaperclip::get('cloud-username'), PhrailsPaperclip::get('cloud-key'));
+		$this->cloud = new CF_Authentication($username, $key);
+	}
+	
+	protected function connect(){
+		
 	}
 	/**
 	 * Write the file to the cloud
