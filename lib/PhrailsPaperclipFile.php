@@ -12,7 +12,7 @@ class PhrailsPaperclipFile implements InterfacePhrailsPaperclip
 	 * @return boolean
 	 * @author Justin Palmer
 	 **/
-	public function write($object, $file_name)
+	public function write($object, $file_name, $container=null)
 	{
 		$file_name = $this->createPath($file_name);
 		return move_uploaded_file($object, $file_name);
@@ -39,9 +39,7 @@ class PhrailsPaperclipFile implements InterfacePhrailsPaperclip
 			$mask = umask(002);
 			if(!file_exists($folder)){
 				//This is a hack to make mkdir not comlain.
-				if(@mkdir($path, 0777)){
-					//chmod($path, 0777);
-				}
+				@mkdir($path, 0777);
 			}	
 			umask($mask);
 		}

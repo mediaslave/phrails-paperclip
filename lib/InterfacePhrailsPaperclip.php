@@ -11,7 +11,7 @@ interface InterfacePhrailsPaperclip
 	 * @return boolean
 	 * @author Justin Palmer
 	 **/
-	public function write($object, $file_name);
+	public function write($object, $file_name, $container=null);
 	
 	/**
 	 * Read a document to a variable

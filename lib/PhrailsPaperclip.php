@@ -24,14 +24,21 @@ class PhrailsPaperclip
 	
 	private $model, $column, $storage, $container, $styles, $path, $hasPath=false;
 	private $public=false;
+	/**
+	 * The storage object making 
+	 */
+	private $attachment;
+	/**
+	 * Store the url when we get it.
+	 */
+	private $url = null;
 	
 	private $valid_storage = array('File', 'Rsc');
 	
 	function __construct($model, $column, $storage='File', $container=null)
-	{
-		//Make sure it is a valid storage mechanism.
-		if(!in_array($storage, $this->valid_storage))
-			throw new Exception('Invalid PhrailsPaperclip Storage mechanism.');
+	{	
+		$this->storage = $storage;
+		$this->setAttachmentObject();
 		//Initialize the vars
 		$this->column = $column;
 		$this->model = $model;
@@ -39,7 +46,6 @@ class PhrailsPaperclip
 		$this->model->$property = $this->get('name');
 		$this->model->filters()->afterSave(array($column, 'write'));
 		$this->model->$column = $this;
-		$this->storage = $storage;
 		$this->container = $container;
 		$this->styles = array();
 	}
@@ -53,13 +59,8 @@ class PhrailsPaperclip
 	 **/
 	public function write()
 	{
-		
-		$storage = 'PhrailsPaperclip' . $this->storage;
-		
 		$path = $this->getPath();
-		
-		$attachment = new $storage();
-		return $attachment->write($this->get('tmp_name'), $path);
+		return $this->attachment->write($this->get('tmp_name'), $path, $this->container);
 	}
 	
 	/**
@@ -71,6 +72,11 @@ class PhrailsPaperclip
 	public function getPath()
 	{
 		$path = '';
+		
+		//test
+		if($this->container !== null)
+			return $this->get('name');
+		
 		$model_column_name = $this->column . '_file_name';
 		$style = self::original;
 		$files_name = $this->get('name');
@@ -108,8 +114,16 @@ class PhrailsPaperclip
 	 **/
 	public function url($style=self::original)
 	{
-		print 'url' . '<br/>';
-		return $this->getPath();
+		if($this->url !== null)
+			return $this->url;
+		//print 'url' . '<br/>';
+		if($this->storage != 'File'){
+			$model_column_name = $this->column . '_file_name';
+			$this->url = $this->attachment->read($this->model->$model_column_name, $this->container);
+			return $this->url;
+		}else{
+			return $this->url = $this->getPath();
+		}
 	}
 	
 	/**
@@ -191,6 +205,23 @@ class PhrailsPaperclip
 		if($this->model->$files_name !== null)
 			return $this->model->$files_name;
 		return null;
+	}
+	
+	/**
+	 * Create the correct storage object.
+	 *
+	 * @return InterfacePhrailsPaperclip
+	 * @author Justin Palmer
+	 **/
+	private function setAttachmentObject()
+	{
+		//Make sure it is a valid storage mechanism.
+		if(!in_array($this->storage, $this->valid_storage))
+			throw new Exception('Invalid PhrailsPaperclip Storage mechanism.');
+		
+		$storage = 'PhrailsPaperclip' . $this->storage;
+		
+		$this->attachment = new $storage();
 	}
 	
 	

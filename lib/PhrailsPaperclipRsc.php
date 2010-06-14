@@ -12,13 +12,27 @@ class PhrailsPaperclipRsc extends AbstractPhrailsPaperclipCloud
 	 * @return Rsc
 	 * @author Justin Palmer
 	 **/
-	public function __construct($username, $key)
+	public function __construct()
 	{
-		$this->cloud = new CF_Authentication($username, $key);
+		if(!defined('PHRAILS_PAPERCLIP_CLOUD_USER'))
+			throw new Exception('PhrailsPaperclipRsc expects that you define global contants: PHRAILS_PAPERCLIP_CLOUD_USER and PHRAILS_PAPERCLIP_CLOUD_KEY');
+		if(!defined('PHRAILS_PAPERCLIP_CLOUD_KEY'))
+			throw new Exception('PhrailsPaperclipRsc expects that you define global contants: PHRAILS_PAPERCLIP_CLOUD_USER and PHRAILS_PAPERCLIP_CLOUD_KEY');
+		$this->cloud = new CF_Authentication(PHRAILS_PAPERCLIP_CLOUD_USER, PHRAILS_PAPERCLIP_CLOUD_KEY);
 	}
 	
-	protected function connect(){
+	/**
+	 * Connect to the cloud and get the container back.
+	 * 
+	 * @param string $container
+	 * @return resource
+	 * @author Justin Palmer
+	 */
+	protected function connect($container){
+		$this->cloud->authenticate();
+		$conn = new CF_Connection($this->cloud);
 		
+		return $conn->get_container($container);
 	}
 	/**
 	 * Write the file to the cloud
@@ -26,11 +40,20 @@ class PhrailsPaperclipRsc extends AbstractPhrailsPaperclipCloud
 	 * @return boolean
 	 * @author Justin Palmer
 	 **/
-	public function write($object, $file_name)
+	public function write($object, $file_name, $container=null)
 	{
-		$size = (float) sprintf("%u", filesize($file_name));
-		$fp = fopen($file_name, "r");
-		return $object->write($fp, $size);
+		$con = $this->connect($container);
+		
+		$file = $con->create_object($file_name);
+		
+		if(is_file($object)){
+			$handle = fopen($object, 'r');
+			$contents = fread($handle, filesize($object));
+			fclose($handle);
+			return $file->write($contents);
+		}else{
+			return $file->write($object);
+		}
 	}
 	
 	/**
@@ -39,9 +62,15 @@ class PhrailsPaperclipRsc extends AbstractPhrailsPaperclipCloud
 	 * @return string
 	 * @author Justin Palmer
 	 **/
-	public function read($object)
+	public function read($object, $container=null)
 	{
-		return $object->read();
+		$con = $this->connect($container);
+		$file = $con->get_object($object);
+		if(!$con->is_public()){
+			return $file->read();
+		}else{
+			return $file->public_uri();
+		}
 	}
 	
 	/**
@@ -49,7 +78,7 @@ class PhrailsPaperclipRsc extends AbstractPhrailsPaperclipCloud
 	 *
 	 * @return void
 	 * @author Justin Palmer
-	 **/
+	 
 	public function stream($object, $disposition='attachment')
 	{
 		header("Content-Type: " . $object->content_type);
@@ -61,4 +90,5 @@ class PhrailsPaperclipRsc extends AbstractPhrailsPaperclipCloud
 	    $object->stream($output);
 	    fclose($output);
 	}
+	**/
 }

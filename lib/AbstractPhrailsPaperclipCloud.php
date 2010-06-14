@@ -13,7 +13,7 @@ abstract class AbstractPhrailsPaperclipCloud implements InterfacePhrailsPapercli
 	 * @return boolean
 	 * @author Justin Palmer
 	 **/
-	public function write($object, $file_name);
+	public function write($object, $file_name, $container=null){}
 	
 	/**
 	 * Read a document to a variable
@@ -21,7 +21,7 @@ abstract class AbstractPhrailsPaperclipCloud implements InterfacePhrailsPapercli
 	 * @return string
 	 * @author Justin Palmer
 	 **/
-	public function read($object);
+	public function read($object){}
 	
 	/**
 	 * Stream a document to the browser
@@ -29,7 +29,7 @@ abstract class AbstractPhrailsPaperclipCloud implements InterfacePhrailsPapercli
 	 * @return void
 	 * @author Justin Palmer
 	 **/
-	public function stream($object, $disposition='attachment');
+	public function stream($object, $disposition='attachment'){}
 	
 	/**
 	 * Get the cloud
@@ -47,5 +47,5 @@ abstract class AbstractPhrailsPaperclipCloud implements InterfacePhrailsPapercli
 	 * 
 	 * @return mixed
 	 */
-	abstract protected function connect();
+	abstract protected function connect($container);
 }
