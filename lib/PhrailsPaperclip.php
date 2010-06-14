@@ -74,7 +74,7 @@ class PhrailsPaperclip
 		$path = '';
 		
 		//test
-		if($this->container !== null)
+		if($this->container !== null && !$this->hasPath())
 			return $this->get('name');
 		
 		$model_column_name = $this->column . '_file_name';
