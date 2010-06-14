@@ -95,6 +95,7 @@ class PhrailsPaperclip
 			$path = str_replace('{file-name}', $file_name_no_extension, $path);
 			$path = str_replace('{style}', $style, $path);
 			$path = str_replace('{extension}', $extension, $path);
+			$path = str_replace('{time}', time(), $path);
 		}else{
 			$install_path = Registry::get('pr-install-path');
 			$default_path = $install_path . '/public/images/paperclip/'; 
