@@ -13,7 +13,7 @@ abstract class AbstractPhrailsPaperclipCloud implements InterfacePhrailsPapercli
 	 * @return boolean
 	 * @author Justin Palmer
 	 **/
-	public function write($object, $file_name, $container=null){}
+	public function write($object, $file_name){}
 	
 	/**
 	 * Read a document to a variable

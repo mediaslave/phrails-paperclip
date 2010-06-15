@@ -37,7 +37,11 @@ class PhrailsPaperclip
 	
 	function __construct($model, $column, $storage='File', $container=null)
 	{	
+		//Set storage and container before we make sure that we have a 
+		//valid storage type.
 		$this->storage = $storage;
+		$this->container = $container;
+		//Make sure we have a valid storage area and create it.
 		$this->setAttachmentObject();
 		//Initialize the vars
 		$this->column = $column;
@@ -46,7 +50,6 @@ class PhrailsPaperclip
 		$this->model->$property = $this->get('name');
 		$this->model->filters()->afterSave(array($column, 'write'));
 		$this->model->$column = $this;
-		$this->container = $container;
 		$this->styles = array();
 	}
 	
@@ -60,7 +63,7 @@ class PhrailsPaperclip
 	public function write()
 	{
 		$path = $this->getPath();
-		return $this->attachment->write($this->get('tmp_name'), $path, $this->container);
+		return $this->attachment->write($this->get('tmp_name'), $path);
 	}
 	
 	/**
@@ -120,10 +123,32 @@ class PhrailsPaperclip
 		//print 'url' . '<br/>';
 		if($this->storage != 'File'){
 			$model_column_name = $this->column . '_file_name';
-			$this->url = $this->attachment->read($this->model->$model_column_name, $this->container);
+			$file = $this->model->$model_column_name;
+			if($this->hasPath()){
+				$file = $this->getPath();
+			}
+			$this->url = $this->attachment->read($file);
 			return $this->url;
 		}else{
 			return $this->url = $this->getPath();
+		}
+	}
+	
+	/**
+	 * Download the file.
+	 *
+	 * @return mixed
+	 * @author Justin Palmer
+	 **/
+	public function download($disposition='attachment')
+	{
+		if($this->storage != 'File'){
+			$model_column_name = $this->column . '_file_name';
+			$file = $this->model->$model_column_name;
+			if($this->hasPath()){
+				$file = $this->getPath();
+			}
+			$this->attachment->stream($file, $disposition);
 		}
 	}
 	
@@ -222,7 +247,7 @@ class PhrailsPaperclip
 		
 		$storage = 'PhrailsPaperclip' . $this->storage;
 		
-		$this->attachment = new $storage();
+		$this->attachment = new $storage($this->container);
 	}
 	
 	
