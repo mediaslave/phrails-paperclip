@@ -4,3 +4,9 @@ What can you expect?
 2. Ability to upload files to RackspaceCloud and other Cloud services.
 3. Retrieve files from the cloud.
 4. Ability resize images and store the different sizes.
+
+Requirements
+
+# Curl - http://www.php.net/manual/en/book.curl.php
+# FileInfo - http://www.php.net/manual/en/book.fileinfo.php
+# GD - http://www.php.net/manual/en/book.image.php
