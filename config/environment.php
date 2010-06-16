@@ -1,4 +1,4 @@
 <?php
 
 //Load the correct environment off the bat.
-include 'environments/' . Registry::get('pr-environment') . '.php';
+include $dirname . '/config/environments/' . Registry::get('pr-environment') . '.php';

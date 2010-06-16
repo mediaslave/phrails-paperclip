@@ -6,14 +6,17 @@ include_once('cloud/rsc/cloudfiles.php');
 class PhrailsPaperclipRsc extends AbstractPhrailsPaperclipCloud
 {
 	
+	private $container; 
+	
 	/**
 	 * Constructor
 	 *
 	 * @return Rsc
 	 * @author Justin Palmer
 	 **/
-	public function __construct()
+	public function __construct($container)
 	{
+		$this->container = $container;
 		if(!defined('PHRAILS_PAPERCLIP_CLOUD_USER'))
 			throw new Exception('PhrailsPaperclipRsc expects that you define global contants: PHRAILS_PAPERCLIP_CLOUD_USER and PHRAILS_PAPERCLIP_CLOUD_KEY');
 		if(!defined('PHRAILS_PAPERCLIP_CLOUD_KEY'))
@@ -40,9 +43,9 @@ class PhrailsPaperclipRsc extends AbstractPhrailsPaperclipCloud
 	 * @return boolean
 	 * @author Justin Palmer
 	 **/
-	public function write($object, $file_name, $container=null)
+	public function write($object, $file_name)
 	{
-		$con = $this->connect($container);
+		$con = $this->connect($this->container);
 		
 		$file = $con->create_object($file_name);
 		
@@ -62,9 +65,9 @@ class PhrailsPaperclipRsc extends AbstractPhrailsPaperclipCloud
 	 * @return string
 	 * @author Justin Palmer
 	 **/
-	public function read($object, $container=null)
+	public function read($object)
 	{
-		$con = $this->connect($container);
+		$con = $this->connect($this->container);
 		$file = $con->get_object($object);
 		if(!$con->is_public()){
 			return $file->read();
@@ -78,17 +81,18 @@ class PhrailsPaperclipRsc extends AbstractPhrailsPaperclipCloud
 	 *
 	 * @return void
 	 * @author Justin Palmer
-	 
+	 **/
 	public function stream($object, $disposition='attachment')
 	{
-		header("Content-Type: " . $object->content_type);
+		$con = $this->connect($this->container);
+		$file = $con->get_object($object);
+		header("Content-Type: " . $file->content_type);
 	    header('Content-transfer-encoding: binary');
 	    header('Cache-Control: private');
 	    header('Pragma: public');
-	    header('Content-Disposition: ' . $disposition . '; filename="'. $object->name . '"');
+	    header('Content-Disposition: ' . $disposition . '; filename="'. $file->name . '"');
 	    $output = fopen("php://output", "w");
-	    $object->stream($output);
+	    $file->stream($output);
 	    fclose($output);
 	}
-	**/
 }
