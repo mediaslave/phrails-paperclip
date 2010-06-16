@@ -1,12 +1,10 @@
-What can you expect?
-
-1. Ability to upload files locally.
-2. Ability to upload files to RackspaceCloud and other Cloud services.
-3. Retrieve files from the cloud.
-4. Ability resize images and store the different sizes.
-
 Requirements
 
+The following PHP package will be required depending on what you are trying to do.
+
+Save to cloud:
 # Curl - http://www.php.net/manual/en/book.curl.php
 # FileInfo - http://www.php.net/manual/en/book.fileinfo.php
-# GD - http://www.php.net/manual/en/book.image.php
+
+Image manipulation:
+# ImageMagick - http://www.php.net/manual/en/book.imagick.php
