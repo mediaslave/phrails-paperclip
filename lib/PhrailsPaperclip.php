@@ -22,7 +22,7 @@ class PhrailsPaperclip
 {
 	const original = 'original';
 	
-	private $model, $column, $storage, $container, $styles, $path, $hasPath=false;
+	private $model, $column, $storage, $container, $styles=array(), $path, $hasPath=false;
 	private $public=false;
 	/**
 	 * The storage object making 
@@ -32,6 +32,8 @@ class PhrailsPaperclip
 	 * Store the url when we get it.
 	 */
 	private $url = null;
+	
+	private $files = array();
 	
 	private $valid_storage = array('File', 'Rsc');
 	
@@ -62,17 +64,25 @@ class PhrailsPaperclip
 	 **/
 	public function write()
 	{
-		$path = $this->getPath();
-		return $this->attachment->write($this->get('tmp_name'), $path);
+		if(empty($this->styles)){
+			$path = $this->getPath();
+			$this->files[] = array($this->get('tmp_name'), $path);
+		}else{
+			$this->convert();
+		}
+		foreach($this->files as $array){
+			$this->attachment->write($array[0], $array[1]);
+		}
 	}
 	
 	/**
 	 * Get the path to the file
-	 *
+	 * 
+	 * @param string $style
 	 * @return string
 	 * @author Justin Palmer
 	 **/
-	public function getPath()
+	public function getPath($style='')
 	{
 		$path = '';
 		
@@ -81,7 +91,7 @@ class PhrailsPaperclip
 			return $this->get('name');
 		
 		$model_column_name = $this->column . '_file_name';
-		$style = self::original;
+		$style = ($style === '') ? self::original : $style;
 		$files_name = $this->get('name');
 		if($files_name === null){
 			$files_name = $this->model->$model_column_name;
@@ -111,12 +121,32 @@ class PhrailsPaperclip
 	}
 	
 	/**
+	 * convert the images according to the styles.
+	 *
+	 * @return void
+	 * @author Justin Palmer
+	 **/
+	private function convert()
+	{
+		foreach($this->styles as $style){
+			$path = $name = $this->getPath($style->style);
+			if($this->storage !== 'File'){
+				$path = '/tmp/' . $name;
+			}
+			$command = "convert " . $this->get('tmp_name') . " -resize $style->size $style->command $path";
+			$command = escapeshellcmd($command);
+			exec($command);
+			$this->files[] = array($path, $name);
+		}
+	}
+	
+	/**
 	 * Get the url for the item.
 	 *
 	 * @return void
 	 * @author Justin Palmer
 	 **/
-	public function url($style=self::original)
+	public function url($style='')
 	{
 		if($this->url !== null)
 			return $this->url;
@@ -125,12 +155,12 @@ class PhrailsPaperclip
 			$model_column_name = $this->column . '_file_name';
 			$file = $this->model->$model_column_name;
 			if($this->hasPath()){
-				$file = $this->getPath();
+				$file = $this->getPath($style);
 			}
 			$this->url = $this->attachment->read($file);
 			return $this->url;
 		}else{
-			return $this->url = $this->getPath();
+			return $this->url = $this->getPath($style);
 		}
 	}
 	
@@ -155,15 +185,18 @@ class PhrailsPaperclip
 	/**
 	 * Set the various styles for images
 	 *
+	 * @param string $name
+	 * @param string $size Size will be passed to the -resize parameter of <code>convert</code>
+	 * @param string $command Additional commands to be passed to <code>convert</code>
 	 * @return void
 	 * @author Justin Palmer
 	 **/
-	public function style($name, $gd, $type=null)
+	public function style($style, $size, $command='')
 	{
 		$o = new stdClass;
-		$o->name = $name;
-		$o->gd = $gd;
-		$o->type = $type;
+		$o->style = $style;
+		$o->size = $size;
+		$o->command = $command;
 		$this->styles[] = $o;
 	}
 	
@@ -197,7 +230,7 @@ class PhrailsPaperclip
 	 * @return void
 	 * @author Justin Palmer
 	 **/
-	public function hasPath()
+	private function hasPath()
 	{
 		return $this->hasPath;
 	}
