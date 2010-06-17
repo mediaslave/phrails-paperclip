@@ -8,7 +8,7 @@
 *	$image->style('medium', '300X300>');
 *	$image->style('thumb', '25X25#', 'png')
 *	
-*	$schema->rule('image_file_name', $image->types('image/png', 'image/jpeg', 'image/jpg', '%s should be an image of type:  jpg, jpeg or png.'));
+*	$schema->rule('image_file_name', $image->content_type_rule('image/png', 'image/jpeg', 'image/jpg'));
 *	
 *	$this->image = $image;
 *	
@@ -146,7 +146,7 @@ class PhrailsPaperclip
 	 * @return void
 	 * @author Justin Palmer
 	 **/
-	public function url($style='')
+	public function url($style='', $stream=false)
 	{
 		if($this->url !== null)
 			return $this->url;
@@ -157,7 +157,8 @@ class PhrailsPaperclip
 			if($this->hasPath()){
 				$file = $this->getPath($style);
 			}
-			$this->url = $this->attachment->read($file);
+			$this->url = ($stream) ? $this->attachment->stream($file, 'inline')
+								   : $this->attachment->read($file);
 			return $this->url;
 		}else{
 			return $this->url = $this->getPath($style);
