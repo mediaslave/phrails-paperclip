@@ -64,6 +64,10 @@ class PhrailsPaperclip
 	 **/
 	public function write()
 	{
+		//If we don't have a file we will return.
+		if(!$this->fileUploaded())
+			return;
+		
 		if(empty($this->styles)){
 			$path = $this->getPath();
 			$this->files[] = array($this->get('tmp_name'), $path);
@@ -265,6 +269,10 @@ class PhrailsPaperclip
 		if($this->model->$files_name !== null)
 			return $this->model->$files_name;
 		return null;
+	}
+	
+	public function fileUploaded(){
+		return ($this->get('error') == UPLOAD_ERR_OK) ? true : false;
 	}
 	
 	/**
