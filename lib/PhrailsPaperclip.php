@@ -152,12 +152,16 @@ class PhrailsPaperclip
 	 **/
 	public function url($style='', $stream=false)
 	{
+		$model_column_name = $this->column . '_file_name';
+		$file = $this->model->$model_column_name;
+		if($file == '')
+			return '';
+		
 		if($this->url !== null)
 			return $this->url;
+		
 		//print 'url' . '<br/>';
 		if($this->storage != 'File'){
-			$model_column_name = $this->column . '_file_name';
-			$file = $this->model->$model_column_name;
 			if($this->hasPath()){
 				$file = $this->getPath($style);
 			}
