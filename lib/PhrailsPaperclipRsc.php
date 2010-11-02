@@ -14,14 +14,10 @@ class PhrailsPaperclipRsc extends AbstractPhrailsPaperclipCloud
 	 * @return Rsc
 	 * @author Justin Palmer
 	 **/
-	public function __construct($container)
+	public function __construct($container, $user, $key)
 	{
 		$this->container = $container;
-		if(!defined('PHRAILS_PAPERCLIP_CLOUD_USER'))
-			throw new Exception('PhrailsPaperclipRsc expects that you define global contants: PHRAILS_PAPERCLIP_CLOUD_USER and PHRAILS_PAPERCLIP_CLOUD_KEY');
-		if(!defined('PHRAILS_PAPERCLIP_CLOUD_KEY'))
-			throw new Exception('PhrailsPaperclipRsc expects that you define global contants: PHRAILS_PAPERCLIP_CLOUD_USER and PHRAILS_PAPERCLIP_CLOUD_KEY');
-		$this->cloud = new CF_Authentication(PHRAILS_PAPERCLIP_CLOUD_USER, PHRAILS_PAPERCLIP_CLOUD_KEY);
+		$this->cloud = new CF_Authentication($user, $key);
 	}
 	
 	/**

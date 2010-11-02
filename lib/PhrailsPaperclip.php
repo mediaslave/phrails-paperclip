@@ -22,7 +22,7 @@ class PhrailsPaperclip
 {
 	const original = 'original';
 	
-	private $model, $column, $storage, $container, $styles=array(), $path, $hasPath=false;
+	private $model, $column, $storage, $styles=array(), $path, $hasPath=false;
 	private $public=false;
 	/**
 	 * The storage object making 
@@ -37,14 +37,24 @@ class PhrailsPaperclip
 	
 	private $valid_storage = array('File', 'Rsc');
 	
-	function __construct($model, $column, $storage='File', $container=null)
+	function __construct($model, $column, $storage='File')
 	{	
+		$config = Registry::get('pr-plugin-phrails-paperclip');
+		if($config === null){
+			throw new Exception('Phrails Paperclip relies on having a config/phrails-paperclip.ini file.  Defined correctly.');
+		}
+		$key = array_pop(explode('\\', get_class($model)));
 		//Set storage and container before we make sure that we have a 
 		//valid storage type.
 		$this->storage = $storage;
-		$this->container = $container;
-		//Make sure we have a valid storage area and create it.
-		$this->setAttachmentObject();
+		//If we have what we need for a cloud service then feed it to the object
+		if(isset($config->global, $config->$key)){
+			$this->setAttachmentObject($config->$key->container, $config->global->user, $config->global->key);
+		//Else just pass null
+		}else{
+			//Make sure we have a valid storage area and create it.
+			$this->setAttachmentObject();
+		}
 		//Initialize the vars
 		$this->column = $column;
 		$this->model = $model;
@@ -285,7 +295,7 @@ class PhrailsPaperclip
 	 * @return InterfacePhrailsPaperclip
 	 * @author Justin Palmer
 	 **/
-	private function setAttachmentObject()
+	private function setAttachmentObject($container=null, $user=null, $key=null)
 	{
 		//Make sure it is a valid storage mechanism.
 		if(!in_array($this->storage, $this->valid_storage))
@@ -293,7 +303,7 @@ class PhrailsPaperclip
 		
 		$storage = 'PhrailsPaperclip' . $this->storage;
 		
-		$this->attachment = new $storage($this->container);
+		$this->attachment = new $storage($container, $user, $key);
 	}
 	
 	
