@@ -23,13 +23,11 @@ We currently only use it with Rackspace Cloud Files. Your File would look someth
     user = <username>
     key = <cloud-resource-key>
 
-    [development:<model-name>]
-    container = <container-in-the-cloud-resource>
+    [development]
+    <model-name> = <container-in-the-cloud-resource>
 
-    [production:<model-name>]
-    container = <container-in-the-cloud-resource>
-
-
-You can have as many of the development:<model-name> sections as you like.  You should have one "development" and one "production".
+    [production]
+    <model-name> = <container-in-the-cloud-resource>
 
 
+Under each environment you can have as many <model-name> = <container-in-the-cloud-resource> tags as you need.

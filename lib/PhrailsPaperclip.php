@@ -39,17 +39,17 @@ class PhrailsPaperclip
 	
 	function __construct($model, $column, $storage='File')
 	{	
+		$key = array_pop(explode('\\', get_class($model)));
 		$config = Registry::get('pr-plugin-phrails-paperclip');
-		if($config === null){
+		if($config === null || !(isset($config->$key))){
 			throw new Exception('Phrails Paperclip relies on having a config/phrails-paperclip.ini file.  Defined correctly.');
 		}
-		$key = array_pop(explode('\\', get_class($model)));
 		//Set storage and container before we make sure that we have a 
 		//valid storage type.
 		$this->storage = $storage;
 		//If we have what we need for a cloud service then feed it to the object
 		if(isset($config->global, $config->$key)){
-			$this->setAttachmentObject($config->$key->container, $config->global->user, $config->global->key);
+			$this->setAttachmentObject($config->$key, $config->global->user, $config->global->key);
 		//Else just pass null
 		}else{
 			//Make sure we have a valid storage area and create it.
