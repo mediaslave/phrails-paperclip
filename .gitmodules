@@ -1,0 +1,3 @@
+[submodule "lib/cloud/rsc"]
+	path = lib/cloud/rsc
+	url = http://github.com/rackspace/php-cloudfiles.git
