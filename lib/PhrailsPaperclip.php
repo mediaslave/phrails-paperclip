@@ -22,7 +22,7 @@ class PhrailsPaperclip
 {
 	const original = 'original';
 	
-	private $model, $column, $storage, $styles=array(), $path, $hasPath=false;
+	private $model, $column, $storage, $container=null, $styles=array(), $path, $hasPath=false;
 	private $public=false;
 	/**
 	 * The storage object making 
@@ -50,6 +50,7 @@ class PhrailsPaperclip
 		//If we have what we need for a cloud service then feed it to the object
 		if(isset($config->global, $config->$key)){
 			$this->setAttachmentObject($config->$key, $config->global->user, $config->global->key);
+			$this->container = $config->$key;
 		//Else just pass null
 		}else{
 			//Make sure we have a valid storage area and create it.
