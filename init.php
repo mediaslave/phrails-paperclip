@@ -4,4 +4,4 @@ $dirname = dirname(__FILE__);
 add_include_directory($dirname . '/app/models');
 add_include_directory($dirname . '/lib');
 
-require($dirname . '/config/environment.php');
+//require($dirname . '/config/environment.php');
