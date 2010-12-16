@@ -277,9 +277,10 @@ class PhrailsPaperclip
 	public function get($name)
 	{
 		$files_name = $this->column . '_file_name';
+		$table_name = Inflections::singularize($this->model->table_name());
 		//Is it in the files global, return it.
-		if(isset($_FILES[Inflections::singularize($this->model->table_name())][$name][$files_name]))
-			return $_FILES[Inflections::singularize($this->model->table_name())][$name][$files_name];
+		if(isset($_FILES[$table_name][$name][$files_name]))
+			return $_FILES[$table_name][$name][$files_name];
 		//is the model property not null, return it.
 		if($this->model->$files_name !== null)
 			return $this->model->$files_name;
