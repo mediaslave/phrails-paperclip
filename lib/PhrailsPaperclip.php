@@ -61,7 +61,8 @@ class PhrailsPaperclip
 		$this->model = $model;
 		$property = $column . '_file_name';
 		$this->model->$property = $this->get('name');
-		$this->model->filters()->afterSave(array($column, 'write'));
+		if($this->fileUploaded() && $this->model->$property !== null)
+			$this->model->filters()->afterSave(array($column, 'write'));
 		$this->model->$column = $this;
 		$this->styles = array();
 	}
@@ -150,7 +151,7 @@ class PhrailsPaperclip
 			}
 			$command = "convert " . $this->get('tmp_name') . " -resize $style->size $style->command $path";
 			$command = escapeshellcmd($command);
-			exec($command);
+			`$command`;
 			$this->files[] = array($path, $name);
 		}
 	}
@@ -223,12 +224,15 @@ class PhrailsPaperclip
 	/**
 	 * Set the rule for the attachment
 	 *
-	 * @return void
+	 * @return ContentTypeRule
 	 * @author Justin Palmer
 	 **/
 	public function content_type_rule($types)	
 	{
 		$args = func_get_args();
+		if(is_array($args[0])){
+			$args = $args[0];
+		}
 		return new ContentTypeRule($this->get('type'), $args);
 	}
 	
@@ -247,7 +251,7 @@ class PhrailsPaperclip
 	/**
 	 * Did the user set a path
 	 *
-	 * @return void
+	 * @return string
 	 * @author Justin Palmer
 	 **/
 	private function hasPath()
