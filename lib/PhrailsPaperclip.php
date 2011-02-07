@@ -86,8 +86,12 @@ class PhrailsPaperclip
 		}else{
 			$this->convert();
 		}
-		foreach($this->files as $array){
-			$this->attachment->write($array[0], $array[1]);
+		try{
+			foreach($this->files as $array){
+				$this->attachment->write($array[0], $array[1]);
+			}
+		}catch(InvalidResponseException $e){
+			throw $e;
 		}
 	}
 	
@@ -102,7 +106,6 @@ class PhrailsPaperclip
 	{
 		$path = '';
 		
-		//test
 		if($this->container !== null && !$this->hasPath())
 			return $this->get('name');
 		
