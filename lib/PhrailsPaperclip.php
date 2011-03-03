@@ -136,7 +136,7 @@ class PhrailsPaperclip
 			 	$file_name .= '.' . $extension;
 			$path = $default_path . $file_name;
 		}
-		return $path;
+		return $this->getGoodFileName($path);
 	}
 	
 	/**
@@ -152,6 +152,7 @@ class PhrailsPaperclip
 			if($this->storage !== 'File'){
 				$path = '/tmp/' . $name;
 			}
+			setlocale(LC_CTYPE, "en_US.UTF-8");
 			$command = "convert " . $this->get('tmp_name') . " -resize $style->size $style->command $path";
 			$command = escapeshellcmd($command);
 			`$command`;
@@ -315,5 +316,15 @@ class PhrailsPaperclip
 		$this->attachment = new $storage($container, $user, $key);
 	}
 	
+	/**
+	 * Take out spaces and other things in the filename
+	 *
+	 * @return void
+	 * @author Justin Palmer
+	 **/
+	private function getGoodFileName($path)
+	{
+		return str_replace(' ', '-', $path);
+	}
 	
 }
