@@ -2,17 +2,17 @@
 
 /**
 * 	$image = new PhrailsPaperclip('image', 'File, Rsc', 'user:null', 'key:null');
-*	
+*
 *	$image->path('/assets/images/{id}/{file-name}-{style}.{extension}')
-*	
+*
 *	$image->style('medium', '300X300>');
 *	$image->style('thumb', '25X25#', 'png')
-*	
+*
 *	$schema->rule('image_file_name', $image->content_type_rule('image/png', 'image/jpeg', 'image/jpg'));
-*	
+*
 *	$this->image = $image;
-*	
-*	
+*
+*
 *	//Stores the asset where it should go file or Rsc or ...
 *	//Throws an exception if the file can not get saved.
 *	//returns an array of items to be stored in the model.
@@ -21,30 +21,30 @@
 class PhrailsPaperclip
 {
 	const original = 'original';
-	
+
 	private $model, $column, $storage, $container=null, $styles=array(), $path, $hasPath=false;
 	private $public=false;
 	/**
-	 * The storage object making 
+	 * The storage object making
 	 */
 	private $attachment;
 	/**
 	 * Store the url when we get it.
 	 */
 	private $url = null;
-	
+
 	private $files = array();
-	
+
 	private $valid_storage = array('File', 'Rsc');
-	
+
 	function __construct($model, $column, $storage='File')
-	{	
+	{
 		$key = array_pop(explode('\\', get_class($model)));
 		$config = Registry::get('pr-plugin-phrails-paperclip');
 		if($config === null || !(isset($config->$key))){
 			throw new Exception('Phrails Paperclip relies on having a config/phrails-paperclip.ini file.  Defined correctly.');
 		}
-		//Set storage and container before we make sure that we have a 
+		//Set storage and container before we make sure that we have a
 		//valid storage type.
 		$this->storage = $storage;
 		//If we have what we need for a cloud service then feed it to the object
@@ -66,10 +66,10 @@ class PhrailsPaperclip
 		$this->model->$column = $this;
 		$this->styles = array();
 	}
-	
+
 	/**
-	 * Store the asset where it belongs.  
-	 * 
+	 * Store the asset where it belongs.
+	 *
 	 * @throws Exception
 	 * @return void
 	 * @author Justin Palmer
@@ -79,7 +79,7 @@ class PhrailsPaperclip
 		//If we don't have a file we will return.
 		if(!$this->fileUploaded())
 			return;
-		
+
 		if(empty($this->styles)){
 			$path = $this->getPath();
 			$this->files[] = array($this->get('tmp_name'), $path);
@@ -94,10 +94,10 @@ class PhrailsPaperclip
 			throw $e;
 		}
 	}
-	
+
 	/**
 	 * Get the path to the file
-	 * 
+	 *
 	 * @param string $style
 	 * @return string
 	 * @author Justin Palmer
@@ -105,10 +105,10 @@ class PhrailsPaperclip
 	public function getPath($style='')
 	{
 		$path = '';
-		
+
 		if($this->container !== null && !$this->hasPath())
 			return $this->get('name');
-		
+
 		$model_column_name = $this->column . '_file_name';
 		$style = ($style === '') ? self::original : $style;
 		$files_name = $this->get('name');
@@ -130,7 +130,7 @@ class PhrailsPaperclip
 			$path = str_replace('{time}', time(), $path);
 		}else{
 			$install_path = Registry::get('pr-install-path');
-			$default_path = $install_path . '/public/images/paperclip/'; 
+			$default_path = $install_path . '/public/images/paperclip/';
 			$file_name = $file_name_no_extension . '-' . $style;
 			if($extension != '')
 			 	$file_name .= '.' . $extension;
@@ -138,7 +138,7 @@ class PhrailsPaperclip
 		}
 		return $this->getGoodFileName($path);
 	}
-	
+
 	/**
 	 * convert the images according to the styles.
 	 *
@@ -159,7 +159,7 @@ class PhrailsPaperclip
 			$this->files[] = array($path, $name);
 		}
 	}
-	
+
 	/**
 	 * Get the url for the item.
 	 *
@@ -172,10 +172,10 @@ class PhrailsPaperclip
 		$file = $this->model->$model_column_name;
 		if($file == '')
 			return '';
-		
+
 		if($this->url !== null)
 			return $this->url;
-		
+
 		//print 'url' . '<br/>';
 		if($this->storage != 'File'){
 			if($this->hasPath()){
@@ -188,7 +188,7 @@ class PhrailsPaperclip
 			return $this->url = $this->getPath($style);
 		}
 	}
-	
+
 	/**
 	 * Download the file.
 	 *
@@ -206,7 +206,7 @@ class PhrailsPaperclip
 			$this->attachment->stream($file, $disposition);
 		}
 	}
-	
+
 	/**
 	 * Set the various styles for images
 	 *
@@ -224,14 +224,14 @@ class PhrailsPaperclip
 		$o->command = $command;
 		$this->styles[] = $o;
 	}
-	
+
 	/**
 	 * Set the rule for the attachment
 	 *
 	 * @return ContentTypeRule
 	 * @author Justin Palmer
 	 **/
-	public function content_type_rule($types)	
+	public function content_type_rule($types)
 	{
 		$args = func_get_args();
 		if(is_array($args[0])){
@@ -239,7 +239,7 @@ class PhrailsPaperclip
 		}
 		return new ContentTypeRule($this->get('type'), $args);
 	}
-	
+
 	/**
 	 * The path that the attachment should be saved to.
 	 *
@@ -251,7 +251,7 @@ class PhrailsPaperclip
 		$this->hasPath = true;
 		$this->path = $path;
 	}
-	
+
 	/**
 	 * Did the user set a path
 	 *
@@ -262,11 +262,11 @@ class PhrailsPaperclip
 	{
 		return $this->hasPath;
 	}
-	
+
 	/**
 	 * Should the attachment be public or private.
-	 * 
-	 * This is ONLY taken into consideration when the storage is a cloud storage.	
+	 *
+	 * This is ONLY taken into consideration when the storage is a cloud storage.
 	 *
 	 * @return void
 	 * @author Justin Palmer
@@ -275,7 +275,7 @@ class PhrailsPaperclip
 	{
 		$this->public = $public;
 	}
-	
+
 	/**
 	 * Get information from the files global.
 	 *
@@ -294,11 +294,11 @@ class PhrailsPaperclip
 			return $this->model->$files_name;
 		return null;
 	}
-	
+
 	public function fileUploaded(){
-		return ($this->get('error') == UPLOAD_ERR_OK) ? true : false;
+		return ($this->get('error') === UPLOAD_ERR_OK) ? true : false;
 	}
-	
+
 	/**
 	 * Create the correct storage object.
 	 *
@@ -310,12 +310,12 @@ class PhrailsPaperclip
 		//Make sure it is a valid storage mechanism.
 		if(!in_array($this->storage, $this->valid_storage))
 			throw new Exception('Invalid PhrailsPaperclip Storage mechanism.');
-		
+
 		$storage = 'PhrailsPaperclip' . $this->storage;
-		
+
 		$this->attachment = new $storage($container, $user, $key);
 	}
-	
+
 	/**
 	 * Take out spaces and other things in the filename
 	 *
@@ -326,5 +326,5 @@ class PhrailsPaperclip
 	{
 		return str_replace(' ', '-', $path);
 	}
-	
+
 }
