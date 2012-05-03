@@ -33,6 +33,8 @@ class PhrailsPaperclip
 	 */
 	private $url = null;
 
+	private $file_content_for_upload;
+
 	private $files = array();
 
 	private $valid_storage = array('File', 'Rsc');
@@ -61,10 +63,30 @@ class PhrailsPaperclip
 		$this->model = $model;
 		$property = $column . '_file_name';
 		$this->model->$property = $this->get('name');
-		if($this->fileUploaded() && $this->model->$property !== null)
-			$this->model->filters()->afterSave(array($column, 'write'));
+		$this->addFilter();
 		$this->model->$column = $this;
 		$this->styles = array();
+	}
+
+	/**
+	 * Add the filter if we can at this time.
+	 * 
+	 * @return void
+	 */
+	public function addFilter(){
+		$property = $this->column . '_file_name';
+		if($this->canUpload() && $this->model->$property !== null)
+			$this->model->filters()->afterSave(array($this->column, 'write'));
+	}
+
+	/**
+	 * Set the stream to upload a file.
+	 * 
+	 * @return void
+	 */
+	public function setFileContentForUpload($content){
+		$this->file_content_for_upload = $content;
+		$this->addFilter();
 	}
 
 	/**
@@ -77,12 +99,13 @@ class PhrailsPaperclip
 	public function write()
 	{
 		//If we don't have a file we will return.
-		if(!$this->fileUploaded())
+		if(!$this->canUpload())
 			return;
 
 		if(empty($this->styles)){
 			$path = $this->getPath();
-			$this->files[] = array($this->get('tmp_name'), $path);
+			$file = (is_null($this->file_content_for_upload)) ? $this->get('tmp_name') : $this->file_content_for_upload;
+			$this->files[] = array($file, $path);
 		}else{
 			$this->convert();
 		}
@@ -237,7 +260,8 @@ class PhrailsPaperclip
 		if(is_array($args[0])){
 			$args = $args[0];
 		}
-		return new ContentTypeRule($this->get('type'), $args);
+		$type = (is_null($this->file_content_for_upload)) ? $this->get('type') : $args[0];
+		return new ContentTypeRule($type, $args);
 	}
 
 	/**
@@ -325,6 +349,15 @@ class PhrailsPaperclip
 	private function getGoodFileName($path)
 	{
 		return str_replace(' ', '-', $path);
+	}
+	
+	/**
+	 * Can we attempt a file upload
+	 * 
+	 * @return boolean
+	 */
+	private function canUpload(){
+		return ($this->fileUploaded() || !is_null($this->file_content_for_upload));
 	}
 
 }
