@@ -114,7 +114,11 @@ class PhrailsPaperclip
 				$this->attachment->write($array[0], $array[1]);
 			}
 		}catch(InvalidResponseException $e){
-			throw $e;
+			$this->model->errors()->set('invalid-response', 'The system could not perform the upload requested due to an invalid response.  If the problem persists please contact support.');
+			return false;
+		}catch(Exception $e){
+			$this->model->errors()->set('exception', 'The system could not perform the upload requested due to an unknown exception.  If the problem persists please contact support.');
+			return false;
 		}
 	}
 
