@@ -44,7 +44,7 @@ class PhrailsPaperclip
 		$key = array_pop(explode('\\', get_class($model)));
 		$config = Registry::get('pr-plugin-phrails-paperclip');
 		if($config === null || !(isset($config->$key))){
-			throw new Exception('Phrails Paperclip relies on having a config/phrails-paperclip.ini file.  Defined correctly.');
+			throw new Exception('Phrails Paperclip relies on having a config/phrails-paperclip.ini file defined correctly.');
 		}
 		//Set storage and container before we make sure that we have a
 		//valid storage type.
@@ -75,8 +75,15 @@ class PhrailsPaperclip
 	 */
 	public function addFilter(){
 		$property = $this->column . '_file_name';
-		if($this->canUpload() && $this->model->$property !== null)
+		if($this->canUpload() && $this->model->$property !== null){
+
+			//If we can let's set the mime_type and size
+			try {
+				$this->model->mime_type = $this->get('type');
+				$this->model->size = $this->get('size');
+			} catch (\NoColumnInTableException $e) {}
 			$this->model->filters()->afterSave(array($this->column, 'write'));
+		}
 	}
 
 	/**
@@ -102,6 +109,7 @@ class PhrailsPaperclip
 		if(!$this->canUpload())
 			return;
 
+		//Process styles.
 		if(empty($this->styles)){
 			$path = $this->getPath();
 			$file = (is_null($this->file_content_for_upload)) ? $this->get('tmp_name') : $this->file_content_for_upload;
