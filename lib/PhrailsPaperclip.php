@@ -243,11 +243,11 @@ class PhrailsPaperclip
 			try {
 				header('Content-Disposition: ' . $disposition . '; filename="' . $this->model->$model_column_name . '"');
 				//make sure the mimetype is here before we build the header
-				$this->model->mime_type;
-				header('Content-Type: ' . $this->model->mime_type);
+				//$this->model->mime_type;
+				//header('Content-Type: ' . $this->model->mime_type);
 				//make sure the size is here before we build the header
-				$this->model->size;
-				header('Content-Length: ' . $this->model->size);
+				//$this->model->size;
+				//header('Content-Length: ' . $this->model->size);
 			} catch (\NoColumnInTableException $e) {
 				$send_mime_type = true;
 			}
