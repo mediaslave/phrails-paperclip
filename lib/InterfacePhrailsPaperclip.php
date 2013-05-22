@@ -27,5 +27,5 @@ interface InterfacePhrailsPaperclip
 	 * @return void
 	 * @author Justin Palmer
 	 **/
-	public function stream($object, $disposition='attachment');
+	public function stream($object, $send_mime_type);
 }

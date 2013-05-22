@@ -63,13 +63,14 @@ class PhrailsPaperclipFile implements InterfacePhrailsPaperclip
 	 * @return void
 	 * @author Justin Palmer
 	 **/
-	public function stream($object, $disposition='attachment')
+	public function stream($object, $send_mime_type)
 	{
-		header("Content-Type: " . $object->content_type);
+	    if ($send_mime_type) {
+			header("Content-Type: " . $object->content_type);
+	    }
 	    header('Content-transfer-encoding: binary');
 	    header('Cache-Control: private');
 	    header('Pragma: public');
-	    header('Content-Disposition: ' . $disposition . '; filename="'. $object->name . '"');
 	    $output = fopen("php://output", "w");
 	    $object->stream($output);
 	    fclose($output);

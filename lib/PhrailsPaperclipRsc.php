@@ -78,15 +78,16 @@ class PhrailsPaperclipRsc extends AbstractPhrailsPaperclipCloud
 	 * @return void
 	 * @author Justin Palmer
 	 **/
-	public function stream($object, $disposition='attachment')
+	public function stream($object, $send_mime_type)
 	{
 		$con = $this->connect($this->container);
 		$file = $con->get_object($object);
-		header("Content-Type: " . $file->content_type);
+		if($send_mime_type){
+			header("Content-Type: " . $file->content_type);
+		}
 	    header('Content-transfer-encoding: binary');
 	    header('Cache-Control: private');
 	    header('Pragma: public');
-	    header('Content-Disposition: ' . $disposition . '; filename="'. $file->name . '"');
 	    $output = fopen("php://output", "w");
 	    $file->stream($output);
 	    fclose($output);

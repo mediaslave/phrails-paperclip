@@ -125,7 +125,7 @@ class PhrailsPaperclip
 			$this->model->errors()->set('invalid-response', 'The system could not perform the upload requested due to an invalid response.  If the problem persists please contact support.');
 			return false;
 		}catch(Exception $e){
-			$this->model->errors()->set('exception', 'The system could not perform the upload requested due to an unknown exception.  If the problem persists please contact support.');
+			$this->model->errors()->set('exception', 'The system could not perform the upload requested due to an unknown exception.  If the problem persists please contact support. ' . $e->getCode() . ':' . $e->getMessage());
 			return false;
 		}
 	}
@@ -232,13 +232,22 @@ class PhrailsPaperclip
 	 **/
 	public function download($disposition='attachment')
 	{
+		$send_mime_type = false;
 		if($this->storage != 'File'){
 			$model_column_name = $this->column . '_file_name';
 			$file = $this->model->$model_column_name;
 			if($this->hasPath()){
 				$file = $this->getPath();
 			}
-			$this->attachment->stream($file, $disposition);
+			//If we can send the headers let's try.
+			try {
+				header('Content-Disposition: ' . $disposition . '; filename="' . $this->model->$model_column_name . '"');
+				header('Content-Type: ' . $this->model->mime_type);
+				header('Content-Length: ' . $this->model->size);
+			} catch (\NoColumnInTableException $e) {
+				$send_mime_type = true;
+			}
+			$this->attachment->stream($file, $send_mime_type);
 		}
 	}
 
