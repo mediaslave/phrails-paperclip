@@ -232,7 +232,7 @@ class PhrailsPaperclip
 	 **/
 	public function download($disposition='attachment')
 	{
-		$send_mime_type = false;
+		$send_mime_type = true;
 		if($this->storage != 'File'){
 			$model_column_name = $this->column . '_file_name';
 			$file = $this->model->$model_column_name;
