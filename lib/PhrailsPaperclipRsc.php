@@ -1,5 +1,7 @@
 <?php
-include_once('cloud/rsc/cloudfiles.php');
+include_once('vendor/autoload.php');
+
+use OpenCloud\Rackspace;
 /**
 * Interface for all of the cloud adapters
 */
@@ -17,21 +19,24 @@ class PhrailsPaperclipRsc extends AbstractPhrailsPaperclipCloud
 	public function __construct($container, $user, $key)
 	{
 		$this->container = $container;
-		$this->cloud = new CF_Authentication($user, $key);
+		$this->cloud = new Rackspace(Rackspace::US_IDENTITY_ENDPOINT, array(
+																		'username' => $user,
+																		'apiKey' 	   => $key));
 	}
 	
 	/**
 	 * Connect to the cloud and get the container back.
 	 * 
 	 * @param string $container
-	 * @return resource
+	 * @return resource - container resource
 	 * @author Justin Palmer
 	 */
 	protected function connect($container){
 		$this->cloud->authenticate();
-		$conn = new CF_Connection($this->cloud);
+		$service = $this->cloud->objectStoreService('cloudFiles');
 		
-		return $conn->get_container($container);
+		return $service->getContainer($container);
+
 	}
 	/**
 	 * Write the file to the cloud
@@ -41,18 +46,13 @@ class PhrailsPaperclipRsc extends AbstractPhrailsPaperclipCloud
 	 **/
 	public function write($object, $file_name)
 	{
-		$con = $this->connect($this->container);
-		
-		$file = $con->create_object($file_name);
+		$container = $this->connect($this->container);
 		
 		if(is_file($object)){
-			$handle = fopen($object, 'r');
-			$contents = fread($handle, filesize($object));
-			fclose($handle);
-			return $file->write($contents);
-		}else{
-			return $file->write($object);
+			$object = fopen($object, 'r');
 		}
+		
+		return $container->uploadObject($file_name, $object);
 	}
 	
 	/**
@@ -63,13 +63,8 @@ class PhrailsPaperclipRsc extends AbstractPhrailsPaperclipCloud
 	 **/
 	public function read($object)
 	{
-		$con = $this->connect($this->container);
-		$file = $con->get_object($object);
-		if(!$con->is_public()){
-			return $file->read();
-		}else{
-			return $file->public_uri();
-		}
+		$container = $this->connect($this->container);
+		return $container->getObject($object)->getContent();
 	}
 	
 	/**
@@ -80,16 +75,18 @@ class PhrailsPaperclipRsc extends AbstractPhrailsPaperclipCloud
 	 **/
 	public function stream($object, $send_mime_type)
 	{
-		$con = $this->connect($this->container);
-		$file = $con->get_object($object);
+		$container = $this->connect($this->container);
+
+		$object = $container->getObject($object);
 		if($send_mime_type){
-			header("Content-Type: " . $file->content_type);
+			header("Content-Type: " . $object->getContentType());
 		}
 	    header('Content-transfer-encoding: binary');
 	    header('Cache-Control: private');
 	    header('Pragma: public');
+		header("Content-Length: " . $object->getContentLength());
 	    $output = fopen("php://output", "w");
-	    $file->stream($output);
+	    print $object->getContent();
 	    fclose($output);
 	}
 }
